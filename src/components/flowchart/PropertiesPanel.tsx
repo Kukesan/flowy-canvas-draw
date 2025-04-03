@@ -47,7 +47,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     // Change node type to change its color
     onNodeChange([
       {
-        type: 'change',
+        type: 'replace',
         id: selectedNode.id,
         item: {
           ...selectedNode,
