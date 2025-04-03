@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import {
@@ -17,12 +18,15 @@ import {
   EdgeChange,
   useReactFlow,
   BackgroundVariant,
+  ConnectionMode,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import { ProcessNode, DecisionNode, StartEndNode, IONode } from './NodeTypes';
 import NodePanel from './NodePanel';
 import Toolbar from './Toolbar';
+import PropertiesPanel from './PropertiesPanel';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 // Define node types for the flowchart
 const nodeTypes = {
@@ -62,6 +66,8 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [isConnecting, setIsConnecting] = useState(false);
   const [edgeLabel, setEdgeLabel] = useState('');
+  const [showProperties, setShowProperties] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -96,6 +102,17 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
 
   const handleNodesChange = (changes: NodeChange[]) => {
     onNodesChange(changes);
+    
+    // Find selection changes to update the selected node
+    const selectionChange = changes.find(
+      change => change.type === 'select' && change.selected !== undefined
+    );
+    
+    if (selectionChange && selectionChange.type === 'select') {
+      const selectedNodeId = selectionChange.selected ? selectionChange.id : null;
+      const node = selectedNodeId ? nodes.find(n => n.id === selectedNodeId) : null;
+      setSelectedNode(node || null);
+    }
     
     if (!changes.every(change => change.type === 'select')) {
       addToHistory(getNodes(), getEdges());
@@ -191,81 +208,142 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
     setIsConnecting(!isConnecting);
   };
 
+  const handleToggleProperties = () => {
+    setShowProperties(!showProperties);
+  };
+
   const handleEdgeLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEdgeLabel(e.target.value);
   };
 
+  const updateNodeData = (nodeId: string, data: any) => {
+    setNodes(nodes.map(node => {
+      if (node.id === nodeId) {
+        return {
+          ...node,
+          data
+        };
+      }
+      return node;
+    }));
+    
+    // Update selected node as well
+    if (selectedNode && selectedNode.id === nodeId) {
+      setSelectedNode({
+        ...selectedNode,
+        data
+      });
+    }
+    
+    addToHistory(
+      getNodes().map(node => {
+        if (node.id === nodeId) {
+          return { ...node, data };
+        }
+        return node;
+      }),
+      getEdges()
+    );
+  };
+
   return (
     <div className={`flex h-full w-full ${className}`}>
-      <NodePanel />
-      <div className="flex-1 flex flex-col">
-        <Toolbar
-          onZoomIn={zoomIn}
-          onZoomOut={zoomOut}
-          onDelete={handleDelete}
-          onSave={handleSave}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          onToggleGrid={() => setShowGrid(!showGrid)}
-          onConnectionMode={handleConnectionMode}
-          isConnecting={isConnecting}
-          showGrid={showGrid}
-        />
-        {isConnecting && (
-          <div className="p-2 bg-white border-b border-gray-200 flex items-center">
-            <span className="text-sm font-medium mr-2">Connection Label:</span>
-            <input
-              type="text"
-              value={edgeLabel}
-              onChange={handleEdgeLabelChange}
-              placeholder="Enter edge label"
-              className="px-2 py-1 border border-gray-300 rounded text-sm"
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel defaultSize={20} minSize={15}>
+          <NodePanel />
+        </ResizablePanel>
+        
+        <ResizableHandle withHandle />
+        
+        <ResizablePanel defaultSize={showProperties ? 60 : 80}>
+          <div className="flex-1 flex flex-col h-full">
+            <Toolbar
+              onZoomIn={zoomIn}
+              onZoomOut={zoomOut}
+              onDelete={handleDelete}
+              onSave={handleSave}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              onToggleGrid={() => setShowGrid(!showGrid)}
+              onConnectionMode={handleConnectionMode}
+              onToggleProperties={handleToggleProperties}
+              isConnecting={isConnecting}
+              showGrid={showGrid}
+              showProperties={showProperties}
             />
-            <span className="ml-2 text-xs text-gray-500">Click and drag between node handles to connect</span>
-          </div>
-        )}
-        <div 
-          className="flex-1 h-full w-full"
-          ref={reactFlowWrapper}
-        >
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={handleNodesChange}
-            onEdgesChange={handleEdgesChange}
-            onConnect={onConnect}
-            nodeTypes={nodeTypes}
-            onInit={setReactFlowInstance}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            deleteKeyCode="Delete"
-            fitView
-            snapToGrid
-            snapGrid={[10, 10]}
-            connectionMode={isConnecting ? 'loose' : 'strict'}
-          >
-            {showGrid && (
-              <Background
-                variant={BackgroundVariant.Dots}
-                gap={20}
-                size={1}
-                color="#CCCCCC"
-              />
-            )}
-            <Controls />
-            <MiniMap 
-              nodeStrokeWidth={3}
-              zoomable
-              pannable
-            />
-            <Panel position="top-right" className="bg-white p-2 rounded shadow-sm border border-gray-200">
-              <div className="text-xs text-gray-500">
-                Drag elements from left panel to canvas
+            
+            {isConnecting && (
+              <div className="p-2 bg-white border-b border-gray-200 flex items-center">
+                <span className="text-sm font-medium mr-2">Connection Label:</span>
+                <input
+                  type="text"
+                  value={edgeLabel}
+                  onChange={handleEdgeLabelChange}
+                  placeholder="Enter edge label"
+                  className="px-2 py-1 border border-gray-300 rounded text-sm"
+                />
+                <span className="ml-2 text-xs text-gray-500">Click and drag between node handles to connect</span>
               </div>
-            </Panel>
-          </ReactFlow>
-        </div>
-      </div>
+            )}
+            
+            <div 
+              className="flex-1 h-full w-full"
+              ref={reactFlowWrapper}
+            >
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={handleNodesChange}
+                onEdgesChange={handleEdgesChange}
+                onConnect={onConnect}
+                nodeTypes={nodeTypes}
+                onInit={setReactFlowInstance}
+                onDrop={onDrop}
+                onDragOver={onDragOver}
+                deleteKeyCode="Delete"
+                fitView
+                snapToGrid
+                snapGrid={[10, 10]}
+                connectionMode={isConnecting ? "loose" as ConnectionMode : "strict" as ConnectionMode}
+              >
+                {showGrid && (
+                  <Background
+                    variant={BackgroundVariant.Dots}
+                    gap={20}
+                    size={1}
+                    color="#CCCCCC"
+                  />
+                )}
+                <Controls />
+                <MiniMap 
+                  nodeStrokeWidth={3}
+                  zoomable
+                  pannable
+                />
+                <Panel position="top-right" className="bg-white p-2 rounded shadow-sm border border-gray-200">
+                  <div className="text-xs text-gray-500">
+                    Drag elements from left panel to canvas
+                  </div>
+                </Panel>
+              </ReactFlow>
+            </div>
+          </div>
+        </ResizablePanel>
+        
+        {showProperties && (
+          <>
+            <ResizableHandle withHandle />
+            
+            <ResizablePanel defaultSize={20} minSize={15}>
+              <PropertiesPanel
+                selectedNode={selectedNode}
+                onNodeChange={onNodesChange}
+                updateNodeData={updateNodeData}
+              />
+            </ResizablePanel>
+          </>
+        )}
+      </ResizablePanelGroup>
     </div>
   );
 };
