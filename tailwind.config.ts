@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -51,6 +52,18 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				flowchart: {
+					node: {
+						DEFAULT: '#ffffff',
+						process: '#8B5CF6',
+						decision: '#D946EF',
+						start: '#0EA5E9',
+						end: '#F97316',
+						io: '#10B981',
+					},
+					selected: '#F57DBD',
+					connection: '#8E9196',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
