@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import {
@@ -238,6 +237,7 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
                 variant="dots"
                 gap={20}
                 size={1}
+                color="#CCCCCC"
               />
             )}
             <Controls />

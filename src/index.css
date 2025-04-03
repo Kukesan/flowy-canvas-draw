@@ -94,88 +94,90 @@
   }
 }
 
-.react-flow__handle {
-  width: 8px;
-  height: 8px;
-  background-color: #8B5CF6;
-  border: 1px solid white;
-}
+@layer components {
+  .react-flow__handle {
+    width: 8px;
+    height: 8px;
+    background-color: #8B5CF6;
+    border: 1px solid white;
+  }
 
-.react-flow__handle:hover {
-  background-color: #D946EF;
-}
+  .react-flow__handle:hover {
+    background-color: #D946EF;
+  }
 
-.react-flow__edge-path {
-  stroke: #8E9196;
-  stroke-width: 2;
-}
+  .react-flow__edge-path {
+    stroke: #8E9196;
+    stroke-width: 2;
+  }
 
-.react-flow__edge.selected .react-flow__edge-path {
-  stroke: #F57DBD;
-  stroke-width: 3;
-}
+  .react-flow__edge.selected .react-flow__edge-path {
+    stroke: #F57DBD;
+    stroke-width: 3;
+  }
 
-.react-flow__node.selected {
-  box-shadow: 0 0 0 2px #F57DBD;
-}
+  .react-flow__node.selected {
+    box-shadow: 0 0 0 2px #F57DBD;
+  }
 
-.draggable-node {
-  @apply flex items-center justify-center p-2 bg-white border border-gray-200 rounded-md shadow-sm cursor-move hover:shadow-md transition-shadow;
-  width: 120px;
-  height: 60px;
-}
+  .draggable-node {
+    @apply flex items-center justify-center p-2 bg-white border border-gray-200 rounded-md shadow-sm cursor-move hover:shadow-md transition-shadow;
+    width: 120px;
+    height: 60px;
+  }
 
-.process-node {
-  @apply bg-white border-2 border-flowchart-node-process text-flowchart-node-process rounded-md font-medium;
-}
+  .process-node {
+    @apply bg-white border-2 border-flowchart-node-process text-flowchart-node-process rounded-md font-medium;
+  }
 
-.decision-node {
-  @apply bg-white border-2 border-flowchart-node-decision text-flowchart-node-decision transform rotate-45;
-  width: 70px;
-  height: 70px;
-}
+  .decision-node {
+    @apply bg-white border-2 border-flowchart-node-decision text-flowchart-node-decision rotate-45;
+    width: 70px;
+    height: 70px;
+  }
 
-.decision-node .node-label {
-  @apply transform -rotate-45;
-}
+  .decision-node .node-label {
+    @apply -rotate-45;
+  }
 
-.start-end-node {
-  @apply bg-white border-2 border-flowchart-node-start text-flowchart-node-start rounded-full;
-}
+  .start-end-node {
+    @apply bg-white border-2 border-flowchart-node-start text-flowchart-node-start rounded-full;
+  }
 
-.io-node {
-  @apply bg-white border-2 border-flowchart-node-io text-flowchart-node-io;
-  transform: skew(-20deg);
-}
+  .io-node {
+    @apply bg-white border-2 border-flowchart-node-io text-flowchart-node-io;
+    transform: skew(-20deg);
+  }
 
-.io-node .node-label {
-  @apply transform skew(20deg);
-}
+  .io-node .node-label {
+    transform: skew(20deg);
+  }
 
-.node-panel {
-  @apply w-64 bg-white border-r border-gray-200 p-4 flex flex-col h-full;
-}
+  .node-panel {
+    @apply w-64 bg-white border-r border-gray-200 p-4 flex flex-col h-full;
+  }
 
-.node-panel-header {
-  @apply text-lg font-bold mb-4 text-primary;
-}
+  .node-panel-header {
+    @apply text-lg font-bold mb-4 text-primary;
+  }
 
-.node-panel-content {
-  @apply space-y-4 overflow-y-auto flex-grow;
-}
+  .node-panel-content {
+    @apply space-y-4 overflow-y-auto flex-grow;
+  }
 
-.node-category {
-  @apply space-y-2;
-}
+  .node-category {
+    @apply space-y-2;
+  }
 
-.node-category-title {
-  @apply text-sm font-medium text-gray-500;
-}
+  .node-category-title {
+    @apply text-sm font-medium text-gray-500;
+  }
 
-.nodes-container {
-  @apply grid grid-cols-2 gap-2;
-}
+  .nodes-container {
+    @apply grid grid-cols-2 gap-2;
+  }
 
-.toolbar {
-  @apply flex items-center space-x-2 p-2 bg-white border-b border-gray-200;
+  .toolbar {
+    @apply flex items-center space-x-2 p-2 bg-white border-b border-gray-200;
+  }
 }
