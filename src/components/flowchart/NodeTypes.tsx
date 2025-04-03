@@ -33,7 +33,7 @@ export const ProcessNode = memo(({ id, data, selected, dimensions }: NodeProps) 
 });
 
 export const DecisionNode = memo(({ id, data, selected, dimensions }: NodeProps) => {
-  const size = dimensions?.width || 70;
+  const size = dimensions?.height || 70;
   
   return (
     <ResizableNodeWrapper id={id} selected={selected}>

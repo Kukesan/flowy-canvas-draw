@@ -59,17 +59,25 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   const handleSizeChange = (values: number[]) => {
     const size = values[0];
+    
+    // For decision nodes, we maintain a square shape
+    const width = selectedNode.type === 'decision' ? size : size * 2;
+    const height = size;
+    
     onNodeChange([
       {
         type: 'dimensions',
         id: selectedNode.id,
         dimensions: {
-          width: selectedNode.type === 'decision' ? size : size * 2,
-          height: size,
+          width,
+          height,
         }
       }
     ]);
   };
+
+  // Get current node dimensions or default values
+  const currentHeight = selectedNode.dimensions?.height || 60;
 
   return (
     <div className="properties-panel p-4 space-y-4">
@@ -118,11 +126,11 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       <div className="space-y-2">
         <Label>Size</Label>
         <Slider
-          defaultValue={[60]}
+          defaultValue={[currentHeight]}
           max={120}
           min={40}
           step={10}
-          value={[selectedNode.dimensions?.height || 60]}
+          value={[currentHeight]}
           onValueChange={handleSizeChange}
           className="py-4"
         />

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import {
@@ -103,7 +102,6 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
   const handleNodesChange = (changes: NodeChange[]) => {
     onNodesChange(changes);
     
-    // Find selection changes to update the selected node
     const selectionChange = changes.find(
       change => change.type === 'select' && change.selected !== undefined
     );
@@ -114,8 +112,10 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
       setSelectedNode(node || null);
     }
     
-    if (!changes.every(change => change.type === 'select')) {
-      addToHistory(getNodes(), getEdges());
+    if (changes.some(change => change.type === 'dimensions' || change.type === 'replace')) {
+      setTimeout(() => {
+        addToHistory(getNodes(), getEdges());
+      }, 100);
     }
   };
 
@@ -227,7 +227,6 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
       return node;
     }));
     
-    // Update selected node as well
     if (selectedNode && selectedNode.id === nodeId) {
       setSelectedNode({
         ...selectedNode,
@@ -235,15 +234,17 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
       });
     }
     
-    addToHistory(
-      getNodes().map(node => {
-        if (node.id === nodeId) {
-          return { ...node, data };
-        }
-        return node;
-      }),
-      getEdges()
-    );
+    setTimeout(() => {
+      addToHistory(
+        getNodes().map(node => {
+          if (node.id === nodeId) {
+            return { ...node, data };
+          }
+          return node;
+        }),
+        getEdges()
+      );
+    }, 100);
   };
 
   return (

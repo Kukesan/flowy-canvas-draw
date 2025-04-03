@@ -17,11 +17,11 @@ const ResizableNodeWrapper: React.FC<ResizableNodeProps> = ({ id, selected, chil
           minHeight={40}
           isVisible={selected}
           handleStyle={{ 
-            width: 6, 
-            height: 6, 
-            borderRadius: 3, 
+            width: 8, 
+            height: 8, 
+            borderRadius: 4, 
             backgroundColor: '#FFF', 
-            border: '1px solid #8B5CF6' 
+            border: '2px solid #8B5CF6' 
           }}
         />
       )}
