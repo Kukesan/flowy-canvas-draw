@@ -153,6 +153,26 @@
     transform: skew(20deg);
   }
 
+  /* Edge label styling */
+  .react-flow__edge-text {
+    @apply bg-white px-1 rounded-sm font-medium;
+    font-size: 10px;
+  }
+
+  .react-flow__edge:hover .react-flow__edge-path {
+    stroke: #D946EF;
+    stroke-width: 3;
+  }
+
+  .react-flow__edge:hover .react-flow__edge-text {
+    @apply text-flowchart-node-decision;
+  }
+
+  .react-flow__connection-path {
+    stroke: #8B5CF6;
+    stroke-width: 2;
+  }
+
   .node-panel {
     @apply w-64 bg-white border-r border-gray-200 p-4 flex flex-col h-full;
   }

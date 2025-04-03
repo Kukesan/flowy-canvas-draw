@@ -8,7 +8,8 @@ import {
   Save, 
   Undo, 
   Redo, 
-  Grid3X3
+  Grid3X3,
+  Link
 } from 'lucide-react';
 
 interface ToolbarProps {
@@ -19,6 +20,8 @@ interface ToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
   onToggleGrid: () => void;
+  onConnectionMode: () => void;
+  isConnecting: boolean;
   showGrid: boolean;
 }
 
@@ -30,6 +33,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onUndo,
   onRedo,
   onToggleGrid,
+  onConnectionMode,
+  isConnecting,
   showGrid
 }) => {
   return (
@@ -62,6 +67,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
         title="Toggle Grid"
       >
         <Grid3X3 className="h-4 w-4" />
+      </Button>
+      <Button 
+        variant={isConnecting ? "default" : "outline"} 
+        size="icon" 
+        onClick={onConnectionMode} 
+        title="Connection Mode"
+      >
+        <Link className="h-4 w-4" />
       </Button>
     </div>
   );

@@ -16,6 +16,7 @@ import {
   NodeChange,
   EdgeChange,
   useReactFlow,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -57,11 +58,11 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const { zoomIn, zoomOut, getNodes, getEdges, setViewport } = useReactFlow();
   
-  // History for undo/redo functionality
   const [history, setHistory] = useState<{ nodes: Node[]; edges: Edge[] }[]>([{ nodes: initialNodes, edges: initialEdges }]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [edgeLabel, setEdgeLabel] = useState('');
 
-  // On connection between nodes
   const onConnect = useCallback(
     (params: Connection) => {
       const newEdge = {
@@ -71,19 +72,21 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
           width: 20,
           height: 20,
         },
+        label: edgeLabel || 'connect',
+        labelStyle: { fill: '#888', fontSize: 12 },
         style: { strokeWidth: 2 },
       };
       
       const newEdges = addEdge(newEdge, edges);
       setEdges(newEdges);
       
-      // Update history
       addToHistory(nodes, newEdges);
+      
+      setEdgeLabel('');
     },
-    [edges, nodes]
+    [edges, nodes, edgeLabel]
   );
 
-  // Add current state to history
   const addToHistory = (nodes: Node[], edges: Edge[]) => {
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push({ nodes: [...nodes], edges: [...edges] });
@@ -91,27 +94,22 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
     setHistoryIndex(newHistory.length - 1);
   };
 
-  // Handle node changes and update history
   const handleNodesChange = (changes: NodeChange[]) => {
     onNodesChange(changes);
     
-    // Don't add to history for selection changes
     if (!changes.every(change => change.type === 'select')) {
       addToHistory(getNodes(), getEdges());
     }
   };
 
-  // Handle edge changes and update history
   const handleEdgesChange = (changes: EdgeChange[]) => {
     onEdgesChange(changes);
     
-    // Don't add to history for selection changes
     if (!changes.every(change => change.type === 'select')) {
       addToHistory(getNodes(), getEdges());
     }
   };
 
-  // Undo function
   const handleUndo = () => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
@@ -122,7 +120,6 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
     }
   };
 
-  // Redo function
   const handleRedo = () => {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
@@ -133,7 +130,6 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
     }
   };
 
-  // Delete selected elements
   const handleDelete = () => {
     setNodes((nodes) => nodes.filter((node) => !node.selected));
     setEdges((edges) => edges.filter((edge) => !edge.selected));
@@ -143,25 +139,21 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
     );
   };
 
-  // Save the diagram (demonstrate with JSON for now)
   const handleSave = () => {
     const flowData = {
       nodes: getNodes(),
       edges: getEdges(),
     };
     
-    // In a real app, you'd send this to a server or save to local storage
     console.log('Flowchart data saved:', flowData);
     toast.success('Flowchart saved successfully!');
   };
 
-  // Handle drag over for node placement
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  // Handle drop for adding new nodes
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
@@ -175,13 +167,11 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
 
       const { type, label } = JSON.parse(data);
       
-      // Get position from drop coordinates
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
       });
 
-      // Create new node
       const newNode = {
         id: `${type}-${Date.now()}`,
         type,
@@ -189,15 +179,21 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
         data: { label },
       };
 
-      // Add new node to the graph
       const newNodes = [...nodes, newNode];
       setNodes(newNodes);
       
-      // Update history
       addToHistory(newNodes, edges);
     },
     [reactFlowInstance, nodes, edges]
   );
+
+  const handleConnectionMode = () => {
+    setIsConnecting(!isConnecting);
+  };
+
+  const handleEdgeLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEdgeLabel(e.target.value);
+  };
 
   return (
     <div className={`flex h-full w-full ${className}`}>
@@ -211,8 +207,23 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
           onUndo={handleUndo}
           onRedo={handleRedo}
           onToggleGrid={() => setShowGrid(!showGrid)}
+          onConnectionMode={handleConnectionMode}
+          isConnecting={isConnecting}
           showGrid={showGrid}
         />
+        {isConnecting && (
+          <div className="p-2 bg-white border-b border-gray-200 flex items-center">
+            <span className="text-sm font-medium mr-2">Connection Label:</span>
+            <input
+              type="text"
+              value={edgeLabel}
+              onChange={handleEdgeLabelChange}
+              placeholder="Enter edge label"
+              className="px-2 py-1 border border-gray-300 rounded text-sm"
+            />
+            <span className="ml-2 text-xs text-gray-500">Click and drag between node handles to connect</span>
+          </div>
+        )}
         <div 
           className="flex-1 h-full w-full"
           ref={reactFlowWrapper}
@@ -231,10 +242,11 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
             fitView
             snapToGrid
             snapGrid={[10, 10]}
+            connectionMode={isConnecting ? 'loose' : 'strict'}
           >
             {showGrid && (
               <Background
-                variant="dots"
+                variant={BackgroundVariant.Dots}
                 gap={20}
                 size={1}
                 color="#CCCCCC"
