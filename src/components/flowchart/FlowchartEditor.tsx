@@ -110,9 +110,11 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
       const selectedNodeId = selectionChange.selected ? selectionChange.id : null;
       const node = selectedNodeId ? nodes.find(n => n.id === selectedNodeId) : null;
       setSelectedNode(node || null);
+      console.log("Node selected:", node);
     }
     
-    if (changes.some(change => change.type === 'dimensions' || change.type === 'replace')) {
+    if (changes.some(change => change.type === 'dimensions' || change.type === 'replace' || change.type === 'position')) {
+      console.log("Adding to history due to node change:", changes);
       setTimeout(() => {
         addToHistory(getNodes(), getEdges());
       }, 100);
@@ -217,7 +219,8 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
   };
 
   const updateNodeData = (nodeId: string, data: any) => {
-    setNodes(nodes.map(node => {
+    console.log(`Updating node ${nodeId} data:`, data);
+    setNodes((nodes) => nodes.map(node => {
       if (node.id === nodeId) {
         return {
           ...node,
@@ -306,6 +309,9 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({ className }) => {
                 snapToGrid
                 snapGrid={[10, 10]}
                 connectionMode={isConnecting ? "loose" as ConnectionMode : "strict" as ConnectionMode}
+                onNodeClick={(e, node) => {
+                  console.log("Node clicked:", node);
+                }}
               >
                 {showGrid && (
                   <Background

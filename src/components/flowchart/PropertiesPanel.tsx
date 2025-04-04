@@ -44,7 +44,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   };
 
   const handleColorChange = (value: string) => {
-    // Change node type to change its color
+    console.log(`Changing node type to: ${value}`);
     onNodeChange([
       {
         type: 'replace',
@@ -52,6 +52,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         item: {
           ...selectedNode,
           type: value,
+          data: selectedNode.data,
+          position: selectedNode.position,
+          selected: selectedNode.selected
         }
       }
     ]);
@@ -59,6 +62,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   const handleSizeChange = (values: number[]) => {
     const size = values[0];
+    console.log(`Changing node size to: ${size}`);
     
     // For decision nodes, we maintain a square shape
     const width = selectedNode.type === 'decision' ? size : size * 2;
